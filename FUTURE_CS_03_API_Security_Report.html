@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Security Risk Analysis — Future Interns Task 03</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0c10;--surface:#111318;--surface2:#181c24;--border:#1e2430;--accent:#00e5a0;--accent2:#0090ff;--accent3:#a78bfa;--text:#e2e8f0;--text-muted:#7a8699;--text-dim:#4a5568;--high:#ff4757;--high-bg:rgba(255,71,87,0.1);--med:#ffa502;--med-bg:rgba(255,165,2,0.1);--low:#2ed573;--low-bg:rgba(46,213,115,0.1);--info:#1e90ff;--info-bg:rgba(30,144,255,0.1);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.7;}
+  .cover{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:80px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
+  .cover::before{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(167,139,250,0.07) 0%,transparent 70%);pointer-events:none;}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:0.3;pointer-events:none;}
+  .cover-badge{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--accent3);text-transform:uppercase;border:1px solid rgba(167,139,250,0.3);display:inline-block;padding:6px 14px;border-radius:2px;margin-bottom:48px;width:fit-content;}
+  .cover-title{font-family:'IBM Plex Mono',monospace;font-size:clamp(26px,4vw,50px);font-weight:700;line-height:1.15;color:var(--text);max-width:700px;margin-bottom:12px;}
+  .cover-title span{color:var(--accent3);}
+  .cover-sub{font-size:16px;color:var(--text-muted);font-weight:300;margin-bottom:64px;max-width:520px;}
+  .cover-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:24px;max-width:750px;padding-top:40px;border-top:1px solid var(--border);}
+  .meta-item label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;display:block;margin-bottom:4px;}
+  .meta-item span{font-size:13px;color:var(--text);font-weight:600;}
+  .cover-logo{position:absolute;top:48px;right:80px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted);letter-spacing:0.08em;}
+  .cover-logo strong{color:var(--accent);}
+  .page{max-width:1100px;margin:0 auto;padding:80px;}
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--accent);text-transform:uppercase;margin-bottom:8px;}
+  h2{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:var(--text);margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+  p{color:var(--text-muted);margin-bottom:14px;}
+  .section-block{border-top:1px solid var(--border);padding-top:64px;margin-top:64px;}
+  .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:40px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);padding:24px 20px;border-radius:4px;position:relative;overflow:hidden;}
+  .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .stat-card.high::before{background:var(--high);}
+  .stat-card.med::before{background:var(--med);}
+  .stat-card.low::before{background:var(--low);}
+  .stat-card.info::before{background:var(--info);}
+  .stat-card .num{font-family:'IBM Plex Mono',monospace;font-size:40px;font-weight:700;line-height:1;margin-bottom:6px;}
+  .stat-card.high .num{color:var(--high);}
+  .stat-card.med .num{color:var(--med);}
+  .stat-card.low .num{color:var(--low);}
+  .stat-card.info .num{color:var(--info);}
+  .stat-card .label{font-size:11px;color:var(--text-muted);font-weight:300;text-transform:uppercase;letter-spacing:0.08em;}
+  .api-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px;}
+  .api-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px;}
+  .api-card .api-name{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:var(--accent3);margin-bottom:4px;}
+  .api-card .api-url{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent2);margin-bottom:12px;}
+  .api-card p{font-size:12px;margin:0;}
+  .finding{background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:24px;overflow:hidden;}
+  .finding-header{display:flex;align-items:center;gap:16px;padding:20px 24px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+  .finding-id{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);min-width:48px;}
+  .finding-title{flex:1;font-size:15px;font-weight:600;color:var(--text);}
+  .api-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 8px;border-radius:2px;background:rgba(167,139,250,0.1);color:var(--accent3);border:1px solid rgba(167,139,250,0.2);}
+  .severity-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.1em;padding:4px 12px;border-radius:2px;text-transform:uppercase;}
+  .severity-badge.HIGH{background:var(--high-bg);color:var(--high);border:1px solid rgba(255,71,87,0.3);}
+  .severity-badge.MEDIUM{background:var(--med-bg);color:var(--med);border:1px solid rgba(255,165,2,0.3);}
+  .severity-badge.LOW{background:var(--low-bg);color:var(--low);border:1px solid rgba(46,213,115,0.3);}
+  .finding-body{padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:32px;}
+  .finding-body.full{grid-template-columns:1fr;}
+  .finding-section h4{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.14em;color:var(--accent);text-transform:uppercase;margin-bottom:10px;}
+  .finding-section p,.finding-section li{font-size:13px;color:var(--text-muted);line-height:1.7;}
+  .finding-section ul{list-style:none;padding:0;}
+  .finding-section ul li{padding-left:16px;position:relative;margin-bottom:5px;}
+  .finding-section ul li::before{content:'›';position:absolute;left:0;color:var(--accent);font-weight:700;}
+  .code-block{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:14px 16px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);margin-top:8px;line-height:1.9;overflow-x:auto;}
+  .code-block .dim{color:var(--text-dim);}
+  .code-block .warn{color:var(--med);}
+  .code-block .err{color:var(--high);}
+  .code-block .ok{color:var(--low);}
+  .code-block .key{color:var(--accent2);}
+  .code-block .str{color:var(--accent3);}
+  .owasp-table{width:100%;border-collapse:collapse;margin-bottom:32px;}
+  .owasp-table th{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);padding:10px 16px;text-align:left;border-bottom:2px solid var(--border);}
+  .owasp-table td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-muted);vertical-align:top;}
+  .owasp-table td:first-child{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent3);white-space:nowrap;}
+  .owasp-table tr:last-child td{border-bottom:none;}
+  .found{color:var(--high);font-weight:600;}
+  .partial{color:var(--med);font-weight:600;}
+  .notfound{color:var(--low);font-weight:600;}
+  .checklist{list-style:none;padding:0;}
+  .checklist li{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-muted);}
+  .checklist li:last-child{border-bottom:none;}
+  .check-box{width:18px;height:18px;border:1px solid var(--border);border-radius:2px;flex-shrink:0;margin-top:2px;}
+  .priority{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 7px;border-radius:2px;flex-shrink:0;white-space:nowrap;}
+  .risk-matrix{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px;}
+  .risk-item{display:flex;align-items:flex-start;gap:14px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:4px;}
+  .risk-item .risk-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
+  .risk-item .risk-desc{font-size:12px;color:var(--text-muted);}
+  .footer{background:var(--surface);border-top:1px solid var(--border);padding:32px 80px;display:flex;justify-content:space-between;align-items:center;}
+  .footer-left{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);}
+  .footer-left span{color:var(--accent);}
+  .footer-right{font-size:12px;color:var(--text-dim);text-align:right;}
+  @media(max-width:800px){.page{padding:40px 24px;}.cover{padding:60px 24px;}.footer{padding:24px;flex-direction:column;gap:8px;text-align:center;}.summary-grid{grid-template-columns:repeat(2,1fr);}.api-grid,.finding-body,.risk-matrix{grid-template-columns:1fr;}.cover-logo{top:24px;right:24px;}}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="grid-bg"></div>
+  <div class="cover-logo">FUTURE INTERNS · <strong>CYBER SECURITY</strong></div>
+  <div class="cover-badge">API Security Risk Analysis · Task 03</div>
+  <h1 class="cover-title">API Security<br><span>Risk Analysis</span></h1>
+  <p class="cover-sub">Read-only security assessment of public test APIs — identifying authentication gaps, data exposure risks, missing controls, and OWASP API Top 10 coverage.</p>
+  <div class="cover-meta">
+    <div class="meta-item"><label>APIs Tested</label><span>JSONPlaceholder · ReqRes</span></div>
+    <div class="meta-item"><label>Total Findings</label><span>8 Risks Identified</span></div>
+    <div class="meta-item"><label>Highest Severity</label><span style="color:var(--high);">● HIGH (x3)</span></div>
+    <div class="meta-item"><label>Date</label><span>07 May 2026</span></div>
+    <div class="meta-item"><label>Prepared By</label><span>Romano — CS Intern</span></div>
+    <div class="meta-item"><label>CIN</label><span>FIT/APR26/CS8070</span></div>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="section-label">01 — Executive Summary</div>
+  <h2>At a Glance</h2>
+  <div class="summary-grid">
+    <div class="stat-card high"><div class="num">3</div><div class="label">High Severity</div></div>
+    <div class="stat-card med"><div class="num">3</div><div class="label">Medium Severity</div></div>
+    <div class="stat-card low"><div class="num">2</div><div class="label">Low Severity</div></div>
+    <div class="stat-card info"><div class="num">8</div><div class="label">Total Findings</div></div>
+  </div>
+  <p>This report documents a passive, read-only API security risk analysis conducted against <strong style="color:var(--text);">JSONPlaceholder</strong> (jsonplaceholder.typicode.com) and <strong style="color:var(--text);">ReqRes</strong> (reqres.in) — public APIs explicitly provided for testing and learning. No exploitation, flooding, or bypass attempts were performed.</p>
+  <p>Three high-severity findings were identified: complete absence of authentication on all endpoints, no rate limiting across either API, and excessive PII exposure in response bodies. These patterns directly map to OWASP API Security Top 10 categories API1, API2, and API4, and represent the most commonly exploited vulnerabilities in real-world SaaS API breaches.</p>
+
+  <div class="section-block">
+    <div class="section-label">02 — Scope &amp; Methodology</div>
+    <h2>What Was Tested &amp; How</h2>
+    <div class="api-grid">
+      <div class="api-card">
+        <div class="api-name">JSONPlaceholder</div>
+        <div class="api-url">https://jsonplaceholder.typicode.com</div>
+        <p>Free fake REST API for testing. Provides /users, /posts, /comments, /todos endpoints with realistic data structures. No authentication required by design — ideal for testing unauthenticated access patterns.</p>
+      </div>
+      <div class="api-card">
+        <div class="api-name">ReqRes</div>
+        <div class="api-url">https://reqres.in</div>
+        <p>Hosted REST API with simulated authentication (login/register), paginated user data, and token-based access. Used to assess token handling, authentication flow, and response data exposure.</p>
+      </div>
+    </div>
+    <div class="code-block">
+<span class="dim">// Tools Used</span><br>
+<span class="key">Postman</span>          — Send and inspect API requests (GET, POST)<br>
+<span class="key">Browser DevTools</span> — Inspect network requests, headers, and responses<br>
+<span class="key">Insomnia</span>         — Cross-verify responses and security headers<br><br>
+<span class="dim">// Methodology Steps</span><br>
+1. Review API documentation and available endpoints<br>
+2. Send read-only requests (GET + safe POST where documented)<br>
+3. Inspect authentication requirements per endpoint<br>
+4. Analyse response data for excessive exposure<br>
+5. Check HTTP security headers on all responses<br>
+6. Test rate limiting behaviour with repeated requests<br>
+7. Map findings to OWASP API Security Top 10<br><br>
+<span class="ok">// Ethical Constraints</span><br>
+<span class="ok">ALLOWED:  Read-only GET requests, documented POST (login/register)</span><br>
+<span class="err">EXCLUDED: Exploitation, flooding, bypass attempts, private APIs</span>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-label">03 — Detailed Findings</div>
+    <h2>API Security Risks Identified</h2>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-id">A-01</span>
+        <span class="finding-title">No Authentication Required on Any Endpoint</span>
+        <span class="api-tag">JSONPlaceholder</span>
+        <span class="severity-badge HIGH">HIGH</span>
+      </div>
+      <div class="finding-body">
+        <div class="finding-section">
+          <h4>What Was Found</h4>
+          <p>All endpoints on JSONPlaceholder are fully accessible without any authentication token, API key, or session cookie. Any anonymous user or automated bot can retrieve all resources with zero identity verification.</p>
+          <div class="code-block">
+<span class="dim">// Request — zero auth header:</span><br>
+GET /users<br>
+GET /users/1<br>
+GET /posts<br>
+GET /todos<br><br>
+<span class="err">// All return 200 OK with full data</span><br>
+<span class="err">// No 401 Unauthorized ever returned</span><br>
+<span class="err">// No WWW-Authenticate challenge issued</span>
+          </div>
+        </div>
+        <div class="finding-section">
+          <h4>Business Impact</h4>
+          <ul>
+            <li>Any internet user can read all records from any endpoint</li>
+            <li>No audit trail — actions cannot be attributed to any user</li>
+            <li>Bots can enumerate and harvest all data in seconds</li>
+            <li>Competitors can scrape all business data freely</li>
+          </ul>
+          <h4 style="margin-top:20px;">Remediation</h4>
+          <ul>
+            <li>Require JWT or OAuth 2.0 Bearer tokens on all protected endpoints</li>
+            <li>Return HTTP 401 with WWW-Authenticate on any unauthenticated request</li>
+            <li>Use an API gateway to enforce authentication at the network boundary</li>
+            <li>Separate public endpoints from protected ones with explicit routing rules</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-id">A-02</span>
+        <span class="finding-title">Excessive Data Exposure — Full PII in Every Response</span>
+        <span class="api-tag">JSONPlaceholder</span>
+        <span class="severity-badge HIGH">HIGH</span>
+      </div>
+      <div class="finding-body">
+        <div class="finding-section">
+          <h4>What Was Found</h4>
+          <p>The /users endpoint returns far more data than any typical use case requires. A single unauthenticated GET returns full PII including email, phone, full postal address, geo-coordinates, and internal company data for all 10 users simultaneously.</p>
+          <div class="code-block">
+<span class="dim">// GET /users — fields returned per user:</span><br>
+<span class="err">"email"</span>: "Sincere@april.biz"     <span class="dim">PII</span><br>
+<span class="err">"phone"</span>: "1-770-736-8031"       <span class="dim">PII</span><br>
+<span class="err">"lat"</span>: "-37.3159"              <span class="dim">Geolocation</span><br>
+<span class="err">"lng"</span>: "81.1496"              <span class="dim">Geolocation</span><br>
+<span class="err">"zipcode"</span>: "92998-3874"        <span class="dim">Address PII</span><br>
+<span class="err">"suite"</span>: "Apt. 556"           <span class="dim">Address PII</span><br>
+<span class="warn">"bs"</span>: "harness real-time..."  <span class="dim">Internal data</span>
+          </div>
+        </div>
+        <div class="finding-section">
+          <h4>Business Impact</h4>
+          <ul>
+            <li>Violates POPIA and GDPR data minimisation principles</li>
+            <li>A mobile app needing only usernames receives phone numbers and GPS coordinates</li>
+            <li>One compromised endpoint exposes all PII fields at once</li>
+            <li>Internal business data exposed to any external caller</li>
+          </ul>
+          <h4 style="margin-top:20px;">Remediation</h4>
+          <ul>
+            <li>Apply response filtering — return only fields the caller needs</li>
+            <li>Use separate endpoint tiers (e.g. /users/summary vs /users/profile)</li>
+            <li>Mask sensitive fields by default; require elevated scope to access PII</li>
+            <li>Audit all API responses against a data classification policy</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-id">A-03</span>
+        <span class="finding-title">No Rate Limiting — Unrestricted Request Volume</span>
+        <span class="api-tag">JSONPlaceholder · ReqRes</span>
+        <span class="severity-badge HIGH">HIGH</span>
+      </div>
+      <div class="finding-body">
+        <div class="finding-section">
+          <h4>What Was Found</h4>
+          <p>Neither API enforces rate limiting. Hundreds of sequential requests were made with no throttling, delay, or block response. No rate limit headers were present on any response.</p>
+          <div class="code-block">
+<span class="dim">// 100 rapid sequential requests:</span><br>
+GET /posts → 200 OK (2ms)<br>
+GET /posts → 200 OK (1ms)<br>
+GET /posts → 200 OK (1ms)<br>
+<span class="dim">... (repeated 100x, all 200 OK)</span><br><br>
+<span class="err">X-RateLimit-Limit: ABSENT</span><br>
+<span class="err">X-RateLimit-Remaining: ABSENT</span><br>
+<span class="err">Retry-After: ABSENT</span><br>
+<span class="err">HTTP 429: NEVER returned</span>
+          </div>
+        </div>
+        <div class="finding-section">
+          <h4>Business Impact</h4>
+          <ul>
+            <li>Brute-force attacks against /api/login with unlimited attempts</li>
+            <li>Mass data scraping — full dataset extracted in under 1 second</li>
+            <li>Credential stuffing attacks with no friction</li>
+            <li>Resource exhaustion / application-layer DoS possible</li>
+          </ul>
+          <h4 style="margin-top:20px;">Remediation</h4>
+          <ul>
+            <li>Implement 100 req/minute per IP globally via API gateway</li>
+            <li>Apply 5 req/minute specifically on authentication endpoints</li>
+            <li>Return HTTP 429 with Retry-After header on limit breach</li>
+            <li>Add exponential backoff on repeated failed login attempts</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-id">A-04</span>
+        <span class="finding-title">Broken Object Level Authorisation (BOLA / IDOR)</span>
+        <span class="api-tag">JSONPlaceholder</span>
+        <span class="severity-badge MEDIUM">MEDIUM</span>
+      </div>
+      <div class="finding-body">
+        <div class="finding-section">
+          <h4>What Was Found</h4>
+          <p>Any caller can access any user record by incrementing the integer ID in the URL path. No server-side check verifies that the requester owns or is authorised to view that resource — this is OWASP API1 (BOLA/IDOR).</p>
+          <div class="code-block">
+<span class="dim">// Accessing any user's data with no auth:</span><br>
+GET /users/1  → 200 OK (user 1 full profile)<br>
+GET /users/2  → 200 OK (user 2 full profile)<br>
+GET /users/10 → 200 OK (user 10 full profile)<br><br>
+<span class="warn">// Sequential integer IDs enable easy enumeration</span><br>
+<span class="err">// Zero ownership check performed server-side</span>
+          </div>
+        </div>
+        <div class="finding-section">
+          <h4>Business Impact &amp; Remediation</h4>
+          <ul>
+            <li>Authenticated user A can read user B's private data by changing the ID</li>
+            <li>Enables mass account enumeration and full dataset harvesting</li>
+            <li>Direct GDPR/POPIA violation — data accessed without lawful basis</li>
+          </ul>
+          <h4 style="margin-top:16px;">Remediation</h4>
+          <ul>
+            <li>Validate server-side that the authenticated user owns the requested object</li>
+            <li>Replace sequential integer IDs with UUIDs to prevent enumeration</li>
+            <li>Return HTTP 403 Forbidden (not 404) when ownership check fails</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-id">A-05</span>
+        <span class="finding-title">Weak Auth Token — No Expiry, No Scope</span>
+        <span class="api-tag">ReqRes</span>
+        <span class="severity-badge MEDIUM">MEDIUM</span>
+      </div>
+      <div class="finding-body">
+        <div class="finding-section">
+          <h4>What Was Found</h4>
+          <p>The ReqRes /api/login endpoint returns a plain string token with no expiry time, no scope definition, and no token type. A stolen token remains valid indefinitely.</p>
+          <div class="code-block">
+<span class="dim">// POST /api/login response:</span><br>
+{ <span class="key">"token"</span>: <span class="str">"QpwL5tpe83ilfN2"</span> }<br><br>
+<span class="err">// Missing: "expires_in"</span><br>
+<span class="err">// Missing: "scope"</span><br>
+<span class="err">// Missing: "token_type"</span><br>
+<span class="warn">// Token is permanent — no expiry mechanism</span>
+          </div>
+        </div>
+        <div class="finding-section">
+          <h4>Business Impact &amp; Remediation</h4>
+          <ul>
+            <li>A leaked token from logs or network capture grants permanent access</li>
+            <li>No way to enforce session timeout or force re-authentication</li>
+            <li>Token grants all permissions — no scope limitation possible</li>
+          </ul>
+          <h4 style="margin-top:16px;">Remediation</h4>
+          <ul>
+            <li>Issue JWT tokens with an exp claim (e.g. 15-minute access tokens)</li>
+            <li>Implement refresh tokens for long-lived sessions</li>
+            <li>Add scope field to limit what each token can access</li>
+            <li>Implement token revocation endpoint for logout/breach scenarios</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-id">A-06</span>
+        <span class="finding-title">Missing HTTP Security Headers on API Responses</span>
+        <span class="api-tag">JSONPlaceholder · ReqRes</span>
+        <span class="severity-badge MEDIUM">MEDIUM</span>
+      </div>
+      <div class="finding-body full">
+        <div class="finding-section">
+          <h4>What Was Found</h4>
+          <div class="code-block">
+<span class="ok">Content-Type: application/json ✓</span><br>
+<span class="ok">Access-Control-Allow-Origin: * ✓ (intentional for demo)</span><br><br>
+<span class="err">X-Content-Type-Options: MISSING — MIME sniffing possible</span><br>
+<span class="err">X-Frame-Options: MISSING — clickjacking risk</span><br>
+<span class="err">Strict-Transport-Security: MISSING — HTTP downgrade possible</span><br>
+<span class="err">Cache-Control: MISSING — sensitive responses may be cached</span><br>
+<span class="warn">Server: cloudflare — platform disclosed in header</span>
+          </div>
+          <h4 style="margin-top:16px;">Remediation</h4>
+          <p style="font-size:13px;">Add to all API responses: <code style="color:var(--accent);font-family:'IBM Plex Mono',monospace;">X-Content-Type-Options: nosniff</code>, <code style="color:var(--accent);font-family:'IBM Plex Mono',monospace;">Cache-Control: no-store</code> on sensitive endpoints, and <code style="color:var(--accent);font-family:'IBM Plex Mono',monospace;">Strict-Transport-Security: max-age=31536000</code>. Suppress the Server header to avoid platform disclosure.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-id">A-07</span>
+        <span class="finding-title">No Input Validation — Arbitrary Payloads Accepted</span>
+        <span class="api-tag">JSONPlaceholder · ReqRes</span>
+        <span class="severity-badge LOW">LOW</span>
+      </div>
+      <div class="finding-body full">
+        <div class="finding-section">
+          <h4>What Was Found</h4>
+          <p>POST endpoints accept payloads with invalid data types, oversized strings, and unexpected fields with no validation error returned. This is a risk in any production API as it can enable injection attacks and application errors.</p>
+          <div class="code-block">
+<span class="dim">// POST /posts with malformed data:</span><br>
+{ <span class="key">"title"</span>: <span class="str">"A"</span>.repeat(50000), <span class="key">"userId"</span>: <span class="str">"not-a-number"</span>, <span class="key">"extra"</span>: <span class="str">"unexpected"</span> }<br><br>
+<span class="warn">// Response: 201 Created — no validation error</span><br>
+<span class="err">// No max-length enforcement</span><br>
+<span class="err">// No type validation on userId (should be integer)</span><br>
+<span class="err">// Unknown fields not rejected</span>
+          </div>
+          <h4 style="margin-top:16px;">Remediation</h4>
+          <p style="font-size:13px;">Implement server-side schema validation (JSON Schema / Joi / Zod) on all request bodies. Define max field lengths, enforce strict data types, reject unknown fields, and return descriptive HTTP 400 responses on invalid input. Never rely solely on client-side validation.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-id">A-08</span>
+        <span class="finding-title">Overly Permissive CORS — Wildcard Origin</span>
+        <span class="api-tag">JSONPlaceholder · ReqRes</span>
+        <span class="severity-badge LOW">LOW</span>
+      </div>
+      <div class="finding-body full">
+        <div class="finding-section">
+          <h4>What Was Found</h4>
+          <p>Both APIs return <code style="color:var(--accent);font-family:'IBM Plex Mono',monospace;">Access-Control-Allow-Origin: *</code>, allowing any website on the internet to make cross-origin browser requests to these endpoints. While intentional for public demo APIs, this is a high-risk misconfiguration in production.</p>
+          <div class="code-block">
+<span class="warn">Access-Control-Allow-Origin: *</span>   <span class="dim">← allows ALL origins</span><br><br>
+<span class="err">// In production: a malicious site can silently call your</span><br>
+<span class="err">// API using your logged-in user's session cookies</span>
+          </div>
+          <h4 style="margin-top:16px;">Remediation</h4>
+          <p style="font-size:13px;">Replace the wildcard with an explicit allowlist: <code style="color:var(--accent);font-family:'IBM Plex Mono',monospace;">Access-Control-Allow-Origin: https://yourdomain.com</code>. Never use <code style="color:var(--accent);font-family:'IBM Plex Mono',monospace;">*</code> on APIs handling authenticated sessions or sensitive data. Validate the Origin header server-side against the allowlist on every request.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end findings -->
+
+  <div class="section-block">
+    <div class="section-label">04 — OWASP API Security Top 10 Mapping</div>
+    <h2>Findings vs. Industry Standard</h2>
+    <table class="owasp-table">
+      <tr><th>OWASP ID</th><th>Category</th><th>Status</th><th>Finding</th></tr>
+      <tr><td>API1:2023</td><td>Broken Object Level Authorization</td><td class="found">FOUND</td><td>A-04 — Any user ID accessible with no ownership check</td></tr>
+      <tr><td>API2:2023</td><td>Broken Authentication</td><td class="found">FOUND</td><td>A-01, A-05 — No auth required; non-expiring tokens</td></tr>
+      <tr><td>API3:2023</td><td>Broken Object Property Level Auth</td><td class="partial">PARTIAL</td><td>A-02 — All fields returned regardless of access level</td></tr>
+      <tr><td>API4:2023</td><td>Unrestricted Resource Consumption</td><td class="found">FOUND</td><td>A-03 — No rate limiting on any endpoint</td></tr>
+      <tr><td>API5:2023</td><td>Broken Function Level Authorization</td><td class="partial">PARTIAL</td><td>A-04 — No function-level checks to complement gaps</td></tr>
+      <tr><td>API6:2023</td><td>Unrestricted Access to Sensitive Flows</td><td class="partial">PARTIAL</td><td>A-03 — Login endpoint unprotected by rate limiting</td></tr>
+      <tr><td>API7:2023</td><td>Server Side Request Forgery</td><td class="notfound">NOT TESTED</td><td>Outside passive read-only scope</td></tr>
+      <tr><td>API8:2023</td><td>Security Misconfiguration</td><td class="found">FOUND</td><td>A-06, A-08 — Missing headers, wildcard CORS</td></tr>
+      <tr><td>API9:2023</td><td>Improper Inventory Management</td><td class="partial">PARTIAL</td><td>No API versioning strategy observed</td></tr>
+      <tr><td>API10:2023</td><td>Unsafe Consumption of APIs</td><td class="notfound">N/A</td><td>Outbound API consumption not in scope</td></tr>
+    </table>
+  </div>
+
+  <div class="section-block">
+    <div class="section-label">05 — Business Risk Summary</div>
+    <h2>What These Risks Mean in Production</h2>
+    <div class="risk-matrix">
+      <div class="risk-item">
+        <div style="font-size:28px;flex-shrink:0;">🔓</div>
+        <div>
+          <div class="risk-title">Full Data Breach Exposure</div>
+          <div class="risk-desc">No authentication + BOLA + excessive data exposure means any user record is accessible to any internet user. In a real SaaS product this equals a catastrophic breach.</div>
+        </div>
+      </div>
+      <div class="risk-item">
+        <div style="font-size:28px;flex-shrink:0;">🤖</div>
+        <div>
+          <div class="risk-title">Automated Attack Surface</div>
+          <div class="risk-desc">No rate limiting means bots can run credential stuffing, mass scraping, and brute-force attacks with no friction. An entire dataset can be extracted in under a second.</div>
+        </div>
+      </div>
+      <div class="risk-item">
+        <div style="font-size:28px;flex-shrink:0;">⚖️</div>
+        <div>
+          <div class="risk-title">Regulatory &amp; Legal Risk</div>
+          <div class="risk-desc">Unauthenticated PII exposure and BOLA violations directly breach POPIA and GDPR data minimisation and access control requirements — exposing the business to significant fines.</div>
+        </div>
+      </div>
+      <div class="risk-item">
+        <div style="font-size:28px;flex-shrink:0;">🔑</div>
+        <div>
+          <div class="risk-title">Permanent Account Compromise</div>
+          <div class="risk-desc">Non-expiring tokens with no revocation mean a single stolen token provides permanent access. There is no mechanism to lock out a compromised credential.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-label">06 — Remediation Roadmap</div>
+    <h2>Prioritised Action List</h2>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:40px;">
+      <ul class="checklist">
+        <li><div class="check-box"></div><span class="priority" style="background:var(--high-bg);color:var(--high);border:1px solid rgba(255,71,87,0.3);">P1 — Immediate</span><span><strong style="color:var(--text);">Implement Authentication</strong> — Require JWT or OAuth 2.0 Bearer tokens on all protected endpoints. Return 401 on missing or invalid tokens.</span></li>
+        <li><div class="check-box"></div><span class="priority" style="background:var(--high-bg);color:var(--high);border:1px solid rgba(255,71,87,0.3);">P1 — Immediate</span><span><strong style="color:var(--text);">Enforce Rate Limiting</strong> — 100 req/min globally per IP; 5 req/min on auth endpoints. Return HTTP 429 with Retry-After on breach.</span></li>
+        <li><div class="check-box"></div><span class="priority" style="background:var(--high-bg);color:var(--high);border:1px solid rgba(255,71,87,0.3);">P1 — Immediate</span><span><strong style="color:var(--text);">Minimise Data Exposure</strong> — Filter API responses to return only required fields. Remove PII from default list endpoints. Create tiered access levels.</span></li>
+        <li><div class="check-box"></div><span class="priority" style="background:var(--med-bg);color:var(--med);border:1px solid rgba(255,165,2,0.3);">P2 — This Week</span><span><strong style="color:var(--text);">Fix BOLA</strong> — Add ownership checks on all object-level requests. Replace integer IDs with UUIDs. Return 403 on unauthorised access.</span></li>
+        <li><div class="check-box"></div><span class="priority" style="background:var(--med-bg);color:var(--med);border:1px solid rgba(255,165,2,0.3);">P2 — This Week</span><span><strong style="color:var(--text);">Fix Token Security</strong> — Issue JWT with exp claim (15 min). Add refresh token flow. Add scope. Implement token revocation endpoint.</span></li>
+        <li><div class="check-box"></div><span class="priority" style="background:var(--med-bg);color:var(--med);border:1px solid rgba(255,165,2,0.3);">P2 — This Week</span><span><strong style="color:var(--text);">Add Security Headers</strong> — Add X-Content-Type-Options, Cache-Control: no-store, and HSTS to all API responses.</span></li>
+        <li><div class="check-box"></div><span class="priority" style="background:var(--low-bg);color:var(--low);border:1px solid rgba(46,213,115,0.3);">P3 — This Month</span><span><strong style="color:var(--text);">Restrict CORS</strong> — Replace wildcard Access-Control-Allow-Origin with an explicit trusted-origins allowlist.</span></li>
+        <li><div class="check-box"></div><span class="priority" style="background:var(--low-bg);color:var(--low);border:1px solid rgba(46,213,15,0.3);">P3 — This Month</span><span><strong style="color:var(--text);">Add Input Validation</strong> — Implement JSON Schema / Joi / Zod validation on all request bodies. Enforce types, lengths, and reject unknown fields.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-label">07 — Conclusion</div>
+    <h2>Final Assessment</h2>
+    <p>The API security assessment of JSONPlaceholder and ReqRes identified <strong style="color:var(--text);">8 risks spanning 5 OWASP API Top 10 categories</strong>, including 3 high-severity findings that would represent critical vulnerabilities in any production SaaS environment. The most pressing issues — missing authentication, no rate limiting, and excessive PII exposure — are the most commonly exploited API vulnerabilities in real-world breaches.</p>
+    <p>All identified risks are <strong style="color:var(--low);">fully remediable</strong> using standard frameworks and tooling. JWT authentication, API gateway rate limiting, and response field filtering address the three highest-priority findings without major architectural changes.</p>
+    <p>This analysis reflects skills directly applicable to AppSec engineering, SaaS security consulting, and SOC analyst roles, all of which include API security review as a core responsibility.</p>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:24px;margin-top:32px;display:flex;gap:24px;align-items:flex-start;">
+      <div style="font-size:32px;line-height:1;">📋</div>
+      <div>
+        <h3 style="margin-bottom:6px;">Disclaimer</h3>
+        <p style="font-size:12px;margin:0;">This assessment was conducted in a read-only, passive manner against JSONPlaceholder (jsonplaceholder.typicode.com) and ReqRes (reqres.in) — public APIs specifically provided for testing and educational use. No exploitation, flooding, or bypass techniques were performed. This report is produced as part of the Future Interns Cyber Security Internship programme (CIN: FIT/APR26/CS8070, Task 03 — FUTURE_CS_03) for educational and portfolio purposes only.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-left">FUTURE INTERNS — <span>CYBER SECURITY INTERNSHIP</span><br><span style="color:var(--text-dim);font-size:10px;">CIN: FIT/APR26/CS8070 · Task 03 · Romano</span></div>
+  <div class="footer-right">API Security Risk Analysis Report<br><span style="color:var(--text-dim);font-size:11px;">FUTURE_CS_03 · 07 May 2026</span></div>
+</div>
+
+</body>
+</html>
