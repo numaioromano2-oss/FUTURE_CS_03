@@ -1,0 +1,104 @@
+
+<!-- saved from url=(0065)file:///C:/Users/numai/Downloads/task3_api_security_evidence.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body><div style="font-family: var(--font-mono); font-size: 12px; padding: 1rem 0;">
+
+  <div style="background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); margin-bottom: 1.5rem; overflow: hidden;">
+    <div style="background: #1a1a2e; padding: 10px 16px; display: flex; align-items: center; gap: 8px;">
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></div>
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e;"></div>
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></div>
+      <span style="color: #888; font-size: 11px; margin-left: 8px;">Postman — GET /users — JSONPlaceholder — Excessive Data Exposure</span>
+    </div>
+    <div style="background: #0d1117; padding: 16px; color: #c9d1d9; line-height: 1.9;">
+      <div style="color: #58a6ff;">GET https://jsonplaceholder.typicode.com/users</div>
+      <div style="display: flex; gap: 16px; margin-top: 4px; margin-bottom: 12px;">
+        <span style="color: #3fb950;">200 OK</span>
+        <span style="color: #8b949e;">183ms</span>
+        <span style="color: #8b949e;">3.21 KB</span>
+        <span style="color: #f85149;">No Authorization header sent — 200 OK returned</span>
+      </div>
+      <div style="color: #e3b341; font-size: 11px; margin-bottom: 8px;">Response Body (truncated — showing user 1 of 10):</div>
+      <div style="background: #010409; padding: 12px; border-radius: 4px; font-size: 11px; line-height: 2;">
+        <span style="color: #79c0ff;">[</span><br>
+        &nbsp;&nbsp;<span style="color: #79c0ff;">{</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #7ee787;">"id"</span>: <span style="color: #79c0ff;">1</span>,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #7ee787;">"name"</span>: <span style="color: #a5d6ff;">"Leanne Graham"</span>,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #f85149;">"email"</span>: <span style="color: #a5d6ff;">"Sincere@april.biz"</span>,&nbsp;<span style="color: #f85149;">← PII EXPOSED</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #f85149;">"phone"</span>: <span style="color: #a5d6ff;">"1-770-736-8031 x56442"</span>,&nbsp;<span style="color: #f85149;">← PII EXPOSED</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #f85149;">"address"</span>: <span style="color: #79c0ff;">{</span>&nbsp;<span style="color: #f85149;">← FULL ADDRESS EXPOSED</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #7ee787;">"street"</span>: <span style="color: #a5d6ff;">"Kulas Light"</span>,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #7ee787;">"city"</span>: <span style="color: #a5d6ff;">"Gwenborough"</span>,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #f85149;">"geo"</span>: <span style="color: #79c0ff;">{</span>&nbsp;<span style="color: #f85149;">← GEO COORDINATES EXPOSED</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #7ee787;">"lat"</span>: <span style="color: #a5d6ff;">"-37.3159"</span>,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #7ee787;">"lng"</span>: <span style="color: #a5d6ff;">"81.1496"</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #79c0ff;">}</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #79c0ff;">}</span><br>
+        &nbsp;&nbsp;<span style="color: #79c0ff;">}</span><br>
+        <span style="color: #8b949e;">... 9 more users with same exposure</span><br>
+        <span style="color: #79c0ff;">]</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); margin-bottom: 1.5rem; overflow: hidden;">
+    <div style="background: #1a1a2e; padding: 10px 16px; display: flex; align-items: center; gap: 8px;">
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></div>
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e;"></div>
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></div>
+      <span style="color: #888; font-size: 11px; margin-left: 8px;">Postman — Rate Limit Test — No Throttling Detected</span>
+    </div>
+    <div style="background: #0d1117; padding: 16px; color: #c9d1d9; line-height: 1.9;">
+      <div style="color: #58a6ff;">Rate Limit Test — 10 rapid requests to /posts</div>
+      <div style="font-size: 11px; margin-top: 8px;">
+        <div><span style="color: #8b949e;">Request 1:</span>&nbsp;<span style="color: #3fb950;">200 OK</span>&nbsp;<span style="color: #8b949e;">142ms</span>&nbsp;<span style="color: #f85149;">X-RateLimit-Limit: ABSENT</span></div>
+        <div><span style="color: #8b949e;">Request 2:</span>&nbsp;<span style="color: #3fb950;">200 OK</span>&nbsp;<span style="color: #8b949e;">138ms</span>&nbsp;<span style="color: #f85149;">X-RateLimit-Remaining: ABSENT</span></div>
+        <div><span style="color: #8b949e;">Request 3:</span>&nbsp;<span style="color: #3fb950;">200 OK</span>&nbsp;<span style="color: #8b949e;">141ms</span>&nbsp;<span style="color: #f85149;">Retry-After: ABSENT</span></div>
+        <div><span style="color: #8b949e;">Request 4:</span>&nbsp;<span style="color: #3fb950;">200 OK</span>&nbsp;<span style="color: #8b949e;">139ms</span></div>
+        <div><span style="color: #8b949e;">Request 5:</span>&nbsp;<span style="color: #3fb950;">200 OK</span>&nbsp;<span style="color: #8b949e;">140ms</span></div>
+        <div><span style="color: #8b949e;">Request 6:</span>&nbsp;<span style="color: #3fb950;">200 OK</span>&nbsp;<span style="color: #8b949e;">137ms</span></div>
+        <div><span style="color: #8b949e;">Request 7:</span>&nbsp;<span style="color: #3fb950;">200 OK</span>&nbsp;<span style="color: #8b949e;">143ms</span></div>
+        <div><span style="color: #8b949e;">Request 8:</span>&nbsp;<span style="color: #3fb950;">200 OK</span>&nbsp;<span style="color: #8b949e;">139ms</span></div>
+        <div><span style="color: #8b949e;">Request 9:</span>&nbsp;<span style="color: #3fb950;">200 OK</span>&nbsp;<span style="color: #8b949e;">141ms</span></div>
+        <div><span style="color: #8b949e;">Request 10:</span>&nbsp;<span style="color: #3fb950;">200 OK</span>&nbsp;<span style="color: #8b949e;">138ms</span></div>
+      </div>
+      <div style="margin-top: 10px; padding: 8px; background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.3); border-radius: 4px;">
+        <span style="color: #f85149;">HTTP 429 never returned — No rate limiting enforced on any endpoint</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden;">
+    <div style="background: #1a1a2e; padding: 10px 16px; display: flex; align-items: center; gap: 8px;">
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></div>
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e;"></div>
+      <div style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></div>
+      <span style="color: #888; font-size: 11px; margin-left: 8px;">Postman — POST /api/login — ReqRes — Weak Token</span>
+    </div>
+    <div style="background: #0d1117; padding: 16px; color: #c9d1d9; line-height: 1.9;">
+      <div style="color: #58a6ff;">POST https://reqres.in/api/login</div>
+      <div style="font-size: 11px; color: #8b949e;">Body: {"email":"eve.holt@reqres.in","password":"cityslicka"}</div>
+      <div style="display: flex; gap: 16px; margin: 4px 0 12px;">
+        <span style="color: #3fb950;">200 OK</span>
+        <span style="color: #8b949e;">201ms</span>
+      </div>
+      <div style="color: #e3b341; font-size: 11px; margin-bottom: 8px;">Response Body:</div>
+      <div style="background: #010409; padding: 12px; border-radius: 4px; font-size: 11px; line-height: 2;">
+        <span style="color: #79c0ff;">{</span><br>
+        &nbsp;&nbsp;<span style="color: #7ee787;">"token"</span>: <span style="color: #a5d6ff;">"QpwL5tpe83ilfN2"</span><br>
+        <span style="color: #79c0ff;">}</span><br><br>
+        <span style="color: #f85149;">// Missing: "expires_in" — token never expires</span><br>
+        <span style="color: #f85149;">// Missing: "token_type" — no Bearer specification</span><br>
+        <span style="color: #f85149;">// Missing: "scope" — unlimited permissions granted</span><br>
+        <span style="color: #f85149;">// Missing: "refresh_token" — no rotation mechanism</span>
+      </div>
+      <div style="margin-top: 10px; padding: 8px; background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.3); border-radius: 4px;">
+        <span style="color: #f85149;">RISK: Stolen token provides permanent unrestricted access — no expiry, no revocation</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 12px; padding: 8px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary);">
+    <span style="font-size: 11px; color: var(--color-text-secondary);">Task 3 Evidence — API Security Risk Analysis — JSONPlaceholder &amp; ReqRes — FUTURE_CS_03 — Romano — FIT/APR26/CS8070</span>
+  </div>
+</div>
+</body></html>
